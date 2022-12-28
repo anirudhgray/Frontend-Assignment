@@ -1,6 +1,25 @@
 import React from 'react'
 
-export default function Field({field, index, handleMouseExit, handleMouseEnter,output, setOutput}) {
+export default function Field({field, index, handleMouseExit, handleMouseEnter,output, setOutput, level, keySoFar}) {
+  const handleInputChange = (e, output, field, keySoFar) => {
+    if (keySoFar)
+    setOutput(
+      {
+        ...output,
+        [keySoFar]: {
+          ...[keySoFar],
+          [field.jsonKey]: e.currentTarget.value
+        }
+      }
+    )
+    else
+    setOutput(
+      {
+        ...output,
+        [field.jsonKey]: e.currentTarget.value
+      }
+    )
+  }
     if (field.validate && field.validate.required) {
       if (field.uiType === "Input" || field.uiType === "Number") {
         return (
@@ -16,7 +35,7 @@ export default function Field({field, index, handleMouseExit, handleMouseEnter,o
                 </span>
               </>
             ) : null}</label>
-            <input type={field.uiType === "Input" ? "text" : field.uiType === "Number" ? "number" : ""} id={field.jsonKey} onInput={e => setOutput({...output, [field.jsonKey]: e.currentTarget.value})} readOnly={field.immutable} placeholder={field.placeholder} required={field.validate ? field.validate.required : null} className='rounded-md border-violet-400 border bg-violet-200 p-2' name={field.jsonKey}></input>
+            <input type={field.uiType === "Input" ? "text" : field.uiType === "Number" ? "number" : ""} id={field.jsonKey} onInput={e => handleInputChange(e, output, field, keySoFar)} readOnly={field.immutable} placeholder={field.placeholder} required={field.validate ? field.validate.required : null} className='rounded-md border-violet-400 border bg-violet-200 p-2' name={field.jsonKey}></input>
           </div>
         )
       }
@@ -27,7 +46,7 @@ export default function Field({field, index, handleMouseExit, handleMouseEnter,o
               {field.validate.options.map((option, optindex) => {
                 return (
                   <div key={optindex}>
-                    <input type="radio" id={`${field.label}radio${optindex}`} name="radios" value={option.value} checked={output[field.jsonKey]===option.value} onChange={e => setOutput({...output, [field.jsonKey]: e.currentTarget.value})} />
+                    <input type="radio" id={`${field.label}radio${optindex}`} name="radios" value={option.value} checked={output[keySoFar] ? output[keySoFar][field.jsonKey]===option.value : output[field.jsonKey]===option.value} onChange={e => handleInputChange(e, output, field, keySoFar)} />
                     <label className='rounded-md text-center p-4' htmlFor={`${field.label}radio${optindex}`}>{option.label}</label>
                   </div>
                 )
@@ -50,7 +69,13 @@ export default function Field({field, index, handleMouseExit, handleMouseEnter,o
                 </span>
               </>
             ) : null}</h2>
-            <div className="mt-3">hm</div>
+            <div className="mt-3 flex flex-col gap-4">
+              {field.subParameters.sort((a,b) => parseInt(a.sort) - parseInt(b.sort)).map((subParam, index) => {
+                return (
+                  <Field field={subParam} index={index} handleMouseEnter={handleMouseEnter} handleMouseExit={handleMouseExit} output={output} setOutput={setOutput} level={subParam.level} keySoFar={keySoFar ? keySoFar+"."+field.jsonKey : field.jsonKey} />
+                )
+              })}
+            </div>
           </div>
         )
       }
