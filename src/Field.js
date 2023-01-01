@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Select from 'react-select'
 import Toggle from 'react-toggle';
 
-export default function Field({field, index, handleMouseExit, handleMouseEnter,output, setOutput, level, keySoFar}) {
+export default function Field({field, index, handleMouseExit, handleMouseEnter,output, setOutput, level, keySoFar, advancedField}) {
+  const [showingAdvSub, setShowingAdvSub] = useState(false)
   function getValue(namespace, parent) {
     var parts = namespace.split('.'),
         current = parent || window;
@@ -86,7 +87,7 @@ export default function Field({field, index, handleMouseExit, handleMouseEnter,o
       }
     )
   }
-    if (field.validate && field.validate.required) {
+    if ((field.validate && field.validate.required) || advancedField) {
       if (field.uiType === "Input" || field.uiType === "Number") {
         return (
           <div key={`reqfield${index}`} className="rounded-md bg-violet-50 p-4 grid grid-cols-2 border border-violet-200">
@@ -122,6 +123,7 @@ export default function Field({field, index, handleMouseExit, handleMouseEnter,o
         )
       }
       else if (field.uiType === "Group") {
+        const hidden = field.subParameters.filter(field => field.validate && !field.validate.required)
         return (
           <div key={`reqfield${index}`} className="rounded-md bg-violet-50 p-4 border border-violet-200">
             <h2 className='my-auto font-bold flex items-center font-bold pb-2 border-slate-300 border-b'>{field.label}{field.description.length ? (
@@ -142,6 +144,25 @@ export default function Field({field, index, handleMouseExit, handleMouseEnter,o
                 )
               })}
             </div>
+            {showingAdvSub ?
+            <div className="mt-3 flex flex-col gap-4">
+              {hidden.sort((a,b) => parseInt(a.sort) - parseInt(b.sort)).map((subParam, index) => {
+                return (
+                  <Field advancedField field={subParam} index={index} handleMouseEnter={handleMouseEnter} handleMouseExit={handleMouseExit} output={output} setOutput={setOutput} level={subParam.level} keySoFar={keySoFar ? keySoFar+"."+field.jsonKey : field.jsonKey} />
+                )
+              })}
+            </div>
+            : null}
+            {hidden.length ?
+            <span className='flex gap-3 pt-4 mt-4 border-t border-slate-300 '>
+              <label htmlFor='adv-fields' className='font-bold'>Show advanced fields</label>
+              <Toggle
+                className='toggle-bg'
+                id='adv-fields'
+                checked={showingAdvSub}
+                onChange={() => setShowingAdvSub(!showingAdvSub)} />
+            </span>
+            : null}
           </div>
         )
       }
@@ -162,7 +183,7 @@ export default function Field({field, index, handleMouseExit, handleMouseEnter,o
             <Select options={field.validate ? field.validate.options : []} id={field.jsonKey} onChange={e => {
               e = {...e, currentTarget: {value: e.value}}
               handleInputChange(e, output, field, keySoFar)
-              }} value={output[keySoFar] ? {"value":output[keySoFar][field.jsonKey], "label":output[keySoFar][field.jsonKey]} : output[field.jsonKey] ? {"value":output[field.jsonKey], "label":output[keySoFar][field.jsonKey]} : null} readOnly={field.immutable} placeholder={field.placeholder} required={field.validate ? field.validate.required : null} className='rounded-md border-violet-400 border bg-violet-200' name={field.jsonKey}/>
+              }} value={getValue("output."+keySoFar, output) ? {"value":getValue("output."+keySoFar+"."+field.jsonKey, output), "label":getValue("output."+keySoFar+"."+field.jsonKey, output)} : getValue("output."+field.jsonKey, output) ? {"value":getValue("output."+field.jsonKey, output), "label":getValue("output."+field.jsonKey, output)} : null} readOnly={field.immutable} placeholder={field.placeholder} required={field.validate ? field.validate.required : null} className='rounded-md border-violet-400 border bg-violet-200' name={field.jsonKey}/>
           </div>
         )
       }
@@ -211,8 +232,6 @@ export default function Field({field, index, handleMouseExit, handleMouseEnter,o
           </div>
         )
       }
-    } else if (field.validate && !field.validate.required) {
-      
     }
     else return null;
 }

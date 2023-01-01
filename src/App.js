@@ -8,6 +8,8 @@ function App() {
   const [schema, setSchema] = useState([])
   const [title, setTitle] = useState("Random Title")
   const [output, setOutput] = useState({})
+  const [advFields, setAdvFields] = useState([])
+  const [showingAdv, setShowingAdv] = useState(false)
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -32,7 +34,8 @@ function App() {
       const o = JSON.parse(e.currentTarget.value);
       if (o && typeof o === "object") {
         setSchema(JSON.parse(e.currentTarget.value).fields);
-        setTitle(JSON.parse(e.currentTarget.value).title)
+        setTitle(JSON.parse(e.currentTarget.value).title);
+        setAdvFields(JSON.parse(e.currentTarget.value).fields.filter(field => field.validate && !field.validate.required))
       }
       else setSchema([])
     } catch {
@@ -55,13 +58,26 @@ function App() {
               )
             })}
           </div>
+          {showingAdv ?
+          <div className="flex flex-col gap-4 mt-6">
+            {advFields.sort((a,b) => parseInt(a.sort) - parseInt(b.sort)).map((field, index) => {
+              return (
+                <Field field={field} advancedField index={index} handleMouseEnter={handleMouseEnter} handleMouseExit={handleMouseExit} output={output} setOutput={setOutput} />
+              )
+            })}
+          </div>
+          : null}
           <div className="pt-4 mt-4 border-slate-300 border-t flex flex-row flex-wrap justify-between items-center">
+            {advFields.length ?
             <span className='flex gap-3'>
               <label htmlFor='adv-fields' className='font-bold'>Show advanced fields</label>
               <Toggle
                 className='toggle-bg'
-                id='adv-fields' />
+                id='adv-fields'
+                checked={showingAdv}
+                onChange={() => setShowingAdv(!showingAdv)} />
             </span>
+            : null}
             <div className="flex flex-row gap-2">
               <button type='button' className='px-2 py-1 h-min border text-violet-500 rounded-md border-violet-500'>Cancel</button>
               <button className='p-2 py-1 border h-min text-white rounded-md border-violet-500 bg-violet-500'>Submit</button>
