@@ -3,6 +3,7 @@ import Toggle from 'react-toggle'
 import "react-toggle/style.css"
 import './App.css';
 import Field from './Field';
+import json from './sample-input.json'
 
 function App() {
   const [schema, setSchema] = useState([])
@@ -10,7 +11,7 @@ function App() {
   const [output, setOutput] = useState({})
   const [advFields, setAdvFields] = useState([])
   const [showingAdv, setShowingAdv] = useState(false)
-  const [input, setInput] = useState("")
+  const [input, setInput] = useState(JSON.stringify(json))
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -47,6 +48,7 @@ function App() {
   }
 
   useEffect(() => {
+    checkJSON({currentTarget: {value: input}})
     if (!input.length) {
       setOutput({})
     }
@@ -54,7 +56,7 @@ function App() {
 
   return (
     <div className="grid md:grid-cols-2 grid-cols-1 h-screen">
-      <textarea placeholder='Enter JSON UI Schema Here' onInput={e => {checkJSON(e);setInput(e.currentTarget.value)}} style={{resize: "none"}} className='md:h-full h-[50vh]' />
+      <textarea placeholder='Enter JSON UI Schema Here' onInput={e => {checkJSON(e);setInput(e.currentTarget.value)}} value={input} style={{resize: "none"}} className='md:h-full h-[50vh]' />
       <div className='bg-violet-900 flex md:h-full h-[50vh] overflow-scroll'>
         {schema && schema.length ?
         <form onSubmit={e => handleSubmit(e)} className="w-full h-min form bg-white rounded-lg m-12 p-4">
