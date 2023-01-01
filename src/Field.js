@@ -102,7 +102,7 @@ export default function Field({field, index, handleMouseExit, handleMouseEnter,o
                 </span>
               </>
             ) : null}</label>
-            <input type={field.uiType === "Input" ? "text" : field.uiType === "Number" ? "number" : ""} id={field.jsonKey} onInput={e => handleInputChange(e, output, field, keySoFar)} value={output[keySoFar] ? output[keySoFar][field.jsonKey] : output[field.jsonKey] ? output[field.jsonKey] : ""} readOnly={field.immutable} placeholder={field.placeholder} required={field.validate ? field.validate.required : null} className='rounded-md border-violet-400 border bg-violet-200 p-2' name={field.jsonKey}></input>
+            <input type={field.uiType === "Input" ? "text" : field.uiType === "Number" ? "number" : ""} id={field.jsonKey} onInput={e => handleInputChange(e, output, field, keySoFar)} value={getValue("output."+keySoFar, output) ? getValue("output."+keySoFar+"."+field.jsonKey, output) : getValue("output."+field.jsonKey, output) ? getValue("output."+field.jsonKey, output) : ""} readOnly={field.immutable} placeholder={field.placeholder} required={field.validate ? field.validate.required : null} className='rounded-md border-violet-400 border bg-violet-200 p-2' name={field.jsonKey}></input>
           </div>
         )
       }

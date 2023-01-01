@@ -10,6 +10,7 @@ function App() {
   const [output, setOutput] = useState({})
   const [advFields, setAdvFields] = useState([])
   const [showingAdv, setShowingAdv] = useState(false)
+  const [input, setInput] = useState("")
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -18,6 +19,7 @@ function App() {
       console.log(pair[0]+ ', ' + pair[1]); 
     }
     console.log(output)
+    alert("Data to be submitted to backend:\n"+JSON.stringify(output))
   }
 
   const handleMouseEnter = (id) => {
@@ -44,9 +46,15 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    if (!input.length) {
+      setOutput({})
+    }
+  }, [input])
+
   return (
     <div className="grid md:grid-cols-2 grid-cols-1 h-screen">
-      <textarea placeholder='Enter JSON UI Schema Here' onInput={e => checkJSON(e)} style={{resize: "none"}} className='md:h-full h-[50vh]' />
+      <textarea placeholder='Enter JSON UI Schema Here' onInput={e => {checkJSON(e);setInput(e.currentTarget.value)}} style={{resize: "none"}} className='md:h-full h-[50vh]' />
       <div className='bg-violet-900 flex md:h-full h-[50vh] overflow-scroll'>
         {schema && schema.length ?
         <form onSubmit={e => handleSubmit(e)} className="w-full h-min form bg-white rounded-lg m-12 p-4">
